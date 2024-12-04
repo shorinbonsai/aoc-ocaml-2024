@@ -1,6 +1,7 @@
 (lang dune 3.7)
 
 (name tanenbaum)
+
 (version 0.1.0)
 
 (generate_opam_files true)
@@ -23,7 +24,10 @@
   ocaml
   reason
   dune
-  (cmdliner(>= 1.2.0))
-  (piaf (>= 0.1.0))
-  (fmt (>= 0.9.0)))
+  (cmdliner
+   (>= 1.2.0))
+  (piaf
+   (>= 0.2.0))
+  (fmt
+   (>= 0.9.0)))
  (tags ("advent-of-code")))

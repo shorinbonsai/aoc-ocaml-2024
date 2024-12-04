@@ -48,8 +48,11 @@ module Run_mode = struct
           Error "Cannot fetch input from adventofcode.com: missing credentials."
       | Some credentials ->
           Result.map_error Piaf.Error.to_string
-          @@ Lwt_main.run
-          @@
+
+           @@ Eio_main.run
+          @@ fun env ->
+          Eio.Switch.run
+          @@ fun sw ->
           let uri =
             Uri.of_string
             @@ String.concat "/"
@@ -62,10 +65,10 @@ module Run_mode = struct
                  ]
           in
           let headers = Credentials.to_headers credentials in
-          let* response = Piaf.Client.Oneshot.get ~headers uri in
-          let* body = Piaf.Body.to_string response.body in
+          let@ response = Piaf.Client.Oneshot.get ~sw env ~headers uri in
+          let@ body = Piaf.Body.to_string response.body in
           write_file filename body;
-          Lwt_result.return body
+          Result.ok body
 
   let get_input (year : int) (day : int) : t -> (string, string) result =
     function
@@ -79,8 +82,10 @@ module Run_mode = struct
     | Test_from_puzzle_input _ -> Ok None
     | Submit { credentials } ->
         Result.map_error Piaf.Error.to_string
-        @@ Lwt_main.run
-        @@
+        @@ Eio_main.run
+        @@ fun env ->
+        Eio.Switch.run
+        @@ fun sw ->
         let uri =
           Uri.of_string
           @@ String.concat "/"
@@ -99,9 +104,10 @@ module Run_mode = struct
         let body =
           Piaf.Body.of_string @@ Fmt.(str "level=%d&answer=%s" part output)
         in
-        let* response = Piaf.Client.Oneshot.post ~headers ~body uri in
-        let* body = Piaf.Body.to_string response.body in
-        Lwt_result.return (Some body)
+        let@ response = Piaf.Client.Oneshot.post ~sw env ~headers ~body uri in
+        let@ body = Piaf.Body.to_string response.body in
+        Result.ok (Some body)
+
 end
 
 module Options = struct
